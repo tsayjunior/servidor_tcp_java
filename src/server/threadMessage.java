@@ -5,6 +5,7 @@
  */
 package server;
 
+import customer.pakage_message;
 import events.DataEvent;
 import events.SocketEventListenner;
 import java.io.BufferedInputStream;
@@ -12,6 +13,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,18 +40,19 @@ public class threadMessage extends Thread {
             try {
                 BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
                 BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
+                ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
                 while (true) {
                     System.out.println("entra a run de threadMessage");
-//                    in = new DataInputStream(socket.getInputStream());
-                    byte[] buffer = new byte[1024];
-                    int bytesLeidos = in.read(buffer);
-                    String respuesta = new String(buffer, 0, bytesLeidos);
-                    System.out.println("Respuesta del Cliente: " + respuesta);
+                    pakage_message respuesta = (pakage_message) objectInputStream.readObject();
+                    
+                    System.out.println("Respuesta del Cliente: " + respuesta.getMessage());
 //                    String mensaje = in.readUTF();
                     DataEvent ce = new DataEvent(respuesta);
                     fireMyEvent(ce);
                 }
             } catch (IOException ex) {
+                Logger.getLogger(threadMessage.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
                 Logger.getLogger(threadMessage.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

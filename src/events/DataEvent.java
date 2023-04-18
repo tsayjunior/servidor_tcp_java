@@ -6,19 +6,20 @@
 package events;
 
 import java.util.EventObject;
-
+import customer.pakage_message;
 /**
  *
  * @author Junior Javier
  */
 public class DataEvent  extends EventObject {
-    public static String data;
+    public static pakage_message pack;
 
-    public DataEvent(String o) {
+
+    public DataEvent(pakage_message o) {
         super(o);
-        data = o;
+        pack = o;
     }
-    public String sendMessage(){
-        return data;
+    public pakage_message sendMessage(){
+        return pack;
     }
 }

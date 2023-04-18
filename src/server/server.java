@@ -5,9 +5,11 @@
  */
 package server;
 
+import customer.customer;
 import events.ConnectEvent;
 import events.DataEvent;
 import events.SocketEventListenner;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -49,12 +51,21 @@ public class server implements SocketEventListenner {
         System.out.println("entra a onConnected, aqui debe añadir al hasmap");
         int aux = customer.size() + 1;
         customer.put(aux, evt.sendSocket());
-        System.out.println("aux " + aux);
 
-        // Crear un String con los datos que deseas enviar
-        String mensaje = "Tu identificador es : " + aux;
-        // Convertir el String en un arreglo de bytes utilizando la codificación UTF-8
-        byte[] buffer = mensaje.getBytes(StandardCharsets.UTF_8);
+        OutputStream outputStream;
+        BufferedInputStream in;
+        try {
+            outputStream = new BufferedOutputStream(evt.sendSocket().getOutputStream());
+            in = new BufferedInputStream(evt.sendSocket().getInputStream());
+            // Crear un String con los datos que deseas enviar
+            send_message_buffer("Tu identificador es : " + aux, outputStream);
+            String respuesta = recive_message_buffer(in);
+            send_message_buffer("introduce tu nick ", outputStream);
+            respuesta = recive_message_buffer(in);
+            
+        } catch (IOException ex) {
+            Logger.getLogger(server.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         threadMessage tm = new threadMessage(evt.sendSocket());
         tm.addMyEventListener(this);
@@ -63,25 +74,56 @@ public class server implements SocketEventListenner {
 
     @Override
     public void onReader(DataEvent evt) {
-        System.out.println("entra a onReader " + evt.sendMessage());
+        System.out.println("entra a onReader " + evt.sendMessage());        
+        System.out.println("entra a onReader " + evt.sendMessage().getMessage());
+
 
         // Crear un String con los datos que deseas enviar
         String mensaje = "mensaje de respuesta del servidor";
         // Convertir el String en un arreglo de bytes utilizando la codificación UTF-8
-        byte[] buffer = mensaje.getBytes(StandardCharsets.UTF_8);
-        for (Socket socket : customer.values()) {
-            try {
-                System.out.println(customer.values());
-                System.out.println(socket);
-                OutputStream outputStream = new BufferedOutputStream(socket.getOutputStream());
-
-                System.out.println("Valor: " + socket);
+//        byte[] buffer = mensaje.getBytes(StandardCharsets.UTF_8);
+//        for (Socket socket : customer.values()) {
+//            try {
+//                System.out.println(customer.values());
+//                System.out.println(socket);
+//                OutputStream outputStream = new BufferedOutputStream(socket.getOutputStream());
+//
+//                System.out.println("Valor: " + socket);
 //                outputStream.write(buffer);
 //                outputStream.flush(); // asegura que todos los datos se envíen
 //                outputStream.write(buffer);
-            } catch (IOException e) {
-                // manejar excepción
-            }
+//            } catch (IOException e) {
+//                // manejar excepción
+//            }
+//        }
+    }
+
+    /**
+     * ** ***** funciones *************
+     */
+    public void send_message_buffer(String message, OutputStream outputStream) {
+        // Convertir el String en un arreglo de bytes utilizando la codificación UTF-8
+        byte[] buffer = message.getBytes(StandardCharsets.UTF_8);
+        try {
+            outputStream.write(buffer);
+            outputStream.flush(); // asegura que todos los datos se envíen
+        } catch (IOException ex) {
+            Logger.getLogger(server.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    public String recive_message_buffer(BufferedInputStream in) {
+
+        byte[] buffer = new byte[1024];
+        String respuesta = null;
+        int bytesLeidos;
+        try {
+            bytesLeidos = in.read(buffer);
+            respuesta = new String(buffer, 0, bytesLeidos);
+        } catch (IOException ex) {
+            Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println(respuesta);
+        return respuesta;
+    }
+
 }
