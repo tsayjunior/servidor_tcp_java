@@ -61,9 +61,9 @@ public class threadConnections extends Thread  {
         while (true) {
             try {
                 // Aceptar conexiones de clientes
-                System.out.println("entra a conexion threadConnections");
+//                System.out.println("entra a conexion threadConnections");
                 socket = servidor.accept();
-                System.out.println("entra a conexion threadConnections fireMyEvent");
+//                System.out.println("entra a conexion threadConnections fireMyEvent");
                 ConnectEvent evento = new ConnectEvent(socket, this);
                 this.fireMyEvent(evento);
                 //System.out.println("Después del evento en HiloConexion");
@@ -77,5 +77,4 @@ public class threadConnections extends Thread  {
             }
         }
     }
-    
 }

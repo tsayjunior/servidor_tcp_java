@@ -18,7 +18,7 @@ public class ConnectEvent extends EventObject {
 
     public ConnectEvent(Socket o, Object source) {
         super(source);
-        sc = o;
+        this.sc = o;
     }
     
     public Socket getSocket(){

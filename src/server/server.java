@@ -5,22 +5,17 @@
  */
 package server;
 
-import customer.customer;
 import events.ConnectEvent;
 import events.DataEvent;
 import events.DesconectionEvent;
 import events.SocketEventListenner;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -44,17 +39,15 @@ public class server implements SocketEventListenner {
     public void correrServidor() {
         try {
             // Crear un socket de servidor en el puerto especificado
-            server = new ServerSocket();
+            server = new ServerSocket(this.port);
             System.out.println("**********servidor iniciado : esperando conexiones *************");
-
             threadPingCustomer hpc = new threadPingCustomer(customer);
             hpc.addMyEventListener(this);
             hpc.start();
-            System.out.println("luego de ir a threadPingCustomer");
+//            System.out.println("luego de ir a threadPingCustomer");
             threadConnections conexiones = new threadConnections(server);
             conexiones.addMyEventListener(this);
             conexiones.start();
-
         } catch (IOException ex) {
             ex.printStackTrace();
             Logger.getLogger(server.class.getName()).log(Level.SEVERE, null, ex);
@@ -76,7 +69,7 @@ public class server implements SocketEventListenner {
 
     @Override
     public void onConnected(ConnectEvent evt) {
-        System.out.println("entra a onConnected");
+//        System.out.println("entra a onConnected");
         Socket socket = evt.getSocket();
         try {
             PrintWriter salida = new PrintWriter(socket.getOutputStream(), true);
@@ -87,7 +80,7 @@ public class server implements SocketEventListenner {
             String key = in.readLine();//Espera que el cliente mande su nombre
 //********agregar cliente a la lista hashmap
             String[] parte = key.split(",");//El cliente manda el ID,Nombre, separar en un vector
-            salida.println("Servidor: Conexión exitosa");
+            salida.println("Servidor : Conexión exitosa");
             System.out.println("se CONECTÓ el cliente con id: " + parte[0] + " y nombre: " + parte[1]);
             agregarCliente(parte[0], parte[1], socket);//ID,Nombre, Socket
             System.out.println("******************************************************");

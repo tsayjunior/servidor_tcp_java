@@ -44,7 +44,8 @@ public class threadMessage extends Thread {
             String mensaje;
             while ((mensaje = entrada.readLine()) != null) {
                 //System.out.println("Mensaje recibido del cliente: " + mensaje);
-                //  salida.println("Respuesta del servidor: " + mensaje.toUpperCase());       
+                //  salida.println("Respuesta del servidor: " + mensaje.toUpperCase());      
+                System.out.println("en threadMessage " + mensaje);
                 DataEvent evento = new DataEvent(mensaje);
                 this.fireMyEvent(evento);
             }

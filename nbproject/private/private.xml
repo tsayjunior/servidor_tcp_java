@@ -3,15 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Junior%20Javier/Documents/NetBeansProjects/servidor_tcp/src/server/threadMessage.java</file>
-            <file>file:/C:/Users/Junior%20Javier/Documents/NetBeansProjects/servidor_tcp/src/customer/customer.java</file>
-            <file>file:/C:/Users/Junior%20Javier/Documents/NetBeansProjects/servidor_tcp/src/server/server.java</file>
-            <file>file:/C:/Users/Junior%20Javier/Documents/NetBeansProjects/servidor_tcp/src/Main/MainCustomer.java</file>
-            <file>file:/C:/Users/Junior%20Javier/Documents/NetBeansProjects/servidor_tcp/src/events/SocketEventListenner.java</file>
-            <file>file:/C:/Users/Junior%20Javier/Documents/NetBeansProjects/servidor_tcp/src/events/DataEvent.java</file>
-            <file>file:/C:/Users/Junior%20Javier/Documents/NetBeansProjects/servidor_tcp/src/events/ConnectEvent.java</file>
-            <file>file:/C:/Users/Junior%20Javier/Documents/NetBeansProjects/servidor_tcp/src/server/threadConnections.java</file>
-            <file>file:/C:/Users/Junior%20Javier/Documents/NetBeansProjects/servidor_tcp/src/customer/pakage_message.java</file>
+            <file>file:/C:/Users/hp/Documents/NetBeansProjects/servidor_tcp_java/src/server/threadConnections.java</file>
+            <file>file:/C:/Users/hp/Documents/NetBeansProjects/servidor_tcp_java/src/server/threadPingCustomer.java</file>
+            <file>file:/C:/Users/hp/Documents/NetBeansProjects/servidor_tcp_java/src/server/server.java</file>
+            <file>file:/C:/Users/hp/Documents/NetBeansProjects/servidor_tcp_java/src/events/ConnectEvent.java</file>
+            <file>file:/C:/Users/hp/Documents/NetBeansProjects/servidor_tcp_java/src/Main/Main.java</file>
         </group>
     </open-files>
 </project-private>

@@ -27,15 +27,16 @@ public class threadPingCustomer extends Thread {
 
     @Override
     public void run() {
-        System.out.println("entra a threadPingCustomer");
+//        System.out.println("entra a threadPingCustomer");
         while (true) {
             // Verificar el estado de cada cliente en la lista
-                System.out.println("entra a while en threadPingCustomer");
+//                System.out.println("entra a while en threadPingCustomer");
             for (Map.Entry<String, Map<String, Object>> entry : Clientes.entrySet()) {
+//                System.out.println("entra a for en run threadPingCustomer");
                 String key = entry.getKey(); // Obtener la clave del mapa exterior
                 Map<String, Object> valor = entry.getValue();
                 Socket socket = (Socket) valor.get("socket");
-                if (socket.isClosed() || !socket.isConnected()) {
+                if (socket.isClosed() || !socket.isConnected() ) {
                     DesconectionEvent evento = new DesconectionEvent(key);
                     NotificarEvento(evento);//notificar evento desconexion al servidor
                     break; // Salir del bucle para evitar ConcurrentModificationException
@@ -45,7 +46,7 @@ public class threadPingCustomer extends Thread {
             try {
                 // Esperar 5 segundos antes de la siguiente verificación
                 Thread.sleep(5000);
-                System.out.println("entra a esperar 5 segundos");
+//                System.out.println("entra a esperar 5 segundos");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
