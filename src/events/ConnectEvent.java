@@ -14,15 +14,18 @@ import java.util.EventObject;
  */
 public class ConnectEvent extends EventObject {
     
-    public static Socket sc;
+    Socket sc;
 
-    public ConnectEvent(Socket o) {
-        super(o);
+    public ConnectEvent(Socket o, Object source) {
+        super(source);
         sc = o;
     }
     
-    public Socket sendSocket(){
+    public Socket getSocket(){
         return sc;
+    }
+    public void setSocket(Socket socket) {
+        this.sc = socket;
     }
     
 }

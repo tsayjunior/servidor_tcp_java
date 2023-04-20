@@ -7,13 +7,17 @@ package customer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,104 +29,81 @@ import server.server;
  */
 public class customer {
 
-    private Socket sc;
-    private int id;
-    private String name;
+    public String id; // Identificador único del cliente
+    private static boolean isDisconnected = false; // Bandera que indica si el cliente está desconectado
 
-    public customer(int puerto) {
-        try {
-            this.sc = new Socket("127.0.0.1", puerto);
-            System.out.println("entra a constructor cliente");
-        } catch (IOException ex) {
-            Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
-    public int getId() {
+    
+    // ... otras propiedades y métodos de la clase Cliente ...
+    // Métodos getter y setter para el identificador único del cliente
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public void initCliente() {
         try {
-            System.out.println("entra a init cliente");
-            BufferedOutputStream out = new BufferedOutputStream(sc.getOutputStream());
-            BufferedInputStream in = new BufferedInputStream(sc.getInputStream());
+            Socket socket = new Socket("localhost", 5000); // Conecta al servidor en el puerto 8080
 
-            String respuesta = recive_message_buffer(in);
-            this.id = get_id(respuesta);
-            send_message_buffer("identificador recibido", out);
-            respuesta = recive_message_buffer(in);
-            send_message_buffer(getName(), out);
+            PrintWriter salida = new PrintWriter(socket.getOutputStream(), true);
 
-            pakage_message msg = new pakage_message(getId(), getName(), "");
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(sc.getOutputStream());
-            ObjectInputStream objectInputStream = new ObjectInputStream(sc.getInputStream());
-            while (true) {
-                msg.setMessage("Holde desde cliente y siendo objeto");
+            BufferedReader teclado = new BufferedReader(new InputStreamReader(System.in));
+//*************Para obtener el cliente Id del servidor
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));//Buffer de entrada
+            String clienteId = in.readLine();//Espera que el servidor le mande el mensaje inicial
+            System.out.println("cliente Id: " + clienteId);
+            this.setId(clienteId);//Se guarda el id que le pasa el servidor al cliente
+//*************Para Enviar el nombre del cliente
 
-                objectOutputStream.writeObject(msg);
+            System.out.println(in.readLine());
+            String nombreCliente = teclado.readLine();
+            salida.println(this.id + "," + nombreCliente); // Enviar el nombre del cliente al servidor
+//*************Respuesta del servidor
+            System.out.println(in.readLine());
+//**********Iniciar la escucha de mensajes
+            threadListenMessageServer hems = new threadListenMessageServer(socket);
+            hems.start();
 
-                objectOutputStream.flush();
+            String mensajeCliente;
+            System.out.println("Escriba 'salir' para abandonar la conversación");
+            System.out.println("Escriba un Nuevo mensaje");
+            System.out.println("**********************************************");
+            //   System.out.println("Yo:");
+            String mensaje = "Yo: ";
+            while ((mensajeCliente = teclado.readLine()) != null) {
+                if ("salir".equalsIgnoreCase(mensajeCliente)) {
+                    break; // Salir del ciclo si el usuario ingresa 'salir'
+                }
+                System.out.println(mensaje + mensajeCliente);
+                salida.println(this.id + "," + mensajeCliente); // Enviar mensajes del usuario (cliente) al servidor
+                // System.out.println("Yo:");
 
-//                String mensaje = "Hola desde cliente!";
-//                out.write(mensaje.getBytes());
-//                out.flush(); // Asegura que todos los datos se envíen
-                //Recibo el mensaje del servidor
-                System.out.println("Antes de recibir mensaje");
-
-//                Person person = (Person) objectInputStream.readObject();
-                System.out.println("despues de recibir mensaje");
             }
-        } catch (IOException ex) {
-            Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
+            // Cierra los flujos y el socket cuando se termina la comunicación con el servidor
+            // Cerrar la conexión con el servidor
+            salida.close();
+            socket.close();
+        } catch (SocketException e) {
+            // Capturar la excepción SocketException
+            System.err.println("Se ha perdido la conexión con el servidor: " + e.getMessage());
+            // Acciones específicas para manejar la desconexión, como cerrar la conexión o reconectar
+            // ...
+        } catch (IOException e) {
+            if (e.getMessage().equals("Socket closed")) {
+                System.out.println("socket cerrado");
+                // El socket ya ha sido cerrado previamente, no es necesario tomar ninguna acción
+            } else {
+                e.printStackTrace();
+            }
+        } finally {
+            isDisconnected = true; // Actualizar la bandera indicando que el cliente se ha desconectado
         }
-
     }
 
-    /**
-     * ** ***** funciones *************
-     */
-    public void send_message_buffer(String message, OutputStream outputStream) {
-        // Convertir el String en un arreglo de bytes utilizando la codificación UTF-8
-        byte[] buffer = message.getBytes(StandardCharsets.UTF_8);
-        try {
-            outputStream.write(buffer);
-            outputStream.flush(); // asegura que todos los datos se envíen
-        } catch (IOException ex) {
-            Logger.getLogger(server.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public static boolean isDisconnected() {
+        return isDisconnected;
     }
 
-    public String recive_message_buffer(BufferedInputStream in) {
-
-        byte[] buffer = new byte[1024];
-        String respuesta = null;
-        int bytesLeidos;
-        try {
-            bytesLeidos = in.read(buffer);
-            respuesta = new String(buffer, 0, bytesLeidos);
-        } catch (IOException ex) {
-            Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        System.out.println(respuesta);
-        return respuesta;
-    }
-
-    public int get_id(String value) {
-        int num = Integer.parseInt(value.substring(value.lastIndexOf(" ") + 1));
-        return (num); // Imprime: 123
-    }
 }

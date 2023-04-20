@@ -15,8 +15,7 @@ public class MainCustomer {
 
     public static void main(String[] args) {
 
-        customer custom = new customer(5000);
-        custom.setName("Javier");
+        customer custom = new customer();
         custom.initCliente();
         
 

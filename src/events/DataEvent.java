@@ -12,14 +12,19 @@ import customer.pakage_message;
  * @author Junior Javier
  */
 public class DataEvent  extends EventObject {
-    public static pakage_message pack;
+    
+    String message;
 
-
-    public DataEvent(pakage_message o) {
+    public DataEvent(String o) {
         super(o);
-        pack = o;
+        this.message = o;
     }
-    public pakage_message sendMessage(){
-        return pack;
+    
+    public String getMensaje() {
+        return message;
+    }
+
+    public void setMensaje(String mensaje) {
+        this.message = mensaje;
     }
 }

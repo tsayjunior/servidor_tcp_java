@@ -15,5 +15,7 @@ public interface SocketEventListenner extends EventListener{
     
   public void onConnected(ConnectEvent evt);
   public void onReader(DataEvent evt);
+  public void onDesconection(DesconectionEvent evt);
 
+  
 }

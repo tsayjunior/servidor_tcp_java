@@ -5,18 +5,14 @@
  */
 package server;
 
-import customer.pakage_message;
 import events.DataEvent;
 import events.SocketEventListenner;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.event.EventListenerList;
 import javax.swing.event.EventListenerList;
 
 /**
@@ -25,43 +21,54 @@ import javax.swing.event.EventListenerList;
  */
 public class threadMessage extends Thread {
 
-    DataInputStream in;
-    DataOutputStream out;
     Socket socket;
+    private boolean clienteDesconectado = false;
 
-    public threadMessage(Socket sc) {
-        socket = sc;
+    protected EventListenerList listenerList = new EventListenerList();
+    
+    public threadMessage(Socket socket) {
+        this.socket = socket;
+    }
+
+    public void setClienteDesconectado(boolean clienteDesconectado) {
+        this.clienteDesconectado = clienteDesconectado;
     }
 
     @Override
     public void run() {
-        while (true) {
+        // Obtener los flujos de entrada y salida del socket
+        try {
+            BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            // PrintWriter salida = new PrintWriter(socket.getOutputStream(), true);
 
+            String mensaje;
+            while ((mensaje = entrada.readLine()) != null) {
+                //System.out.println("Mensaje recibido del cliente: " + mensaje);
+                //  salida.println("Respuesta del servidor: " + mensaje.toUpperCase());       
+                DataEvent evento = new DataEvent(mensaje);
+                this.fireMyEvent(evento);
+            }
+
+            // Cierra los flujos y el socket cuando se termina la comunicación con el cliente
+            entrada.close();
+            socket.close();
+        } catch (SocketException e) {
+            // Manejo de la excepción SocketException
+            System.out.println("Se ha cerrado la conexión del cliente de manera abrupta (threadMessage).");
+            // Puedes cerrar los recursos y finalizar el hilo de manera adecuada aquí
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // Cerrar el hilo cuando el cliente se desconecta
+            System.out.println("Cerrando el hilo Mensaje del servidor con el cliente...");
             try {
-                BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
-                BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
-                ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-                while (true) {
-                    System.out.println("entra a run de threadMessage");
-                    pakage_message respuesta = (pakage_message) objectInputStream.readObject();
-                    
-                    System.out.println("Respuesta del Cliente: " + respuesta.getMessage());
-//                    String mensaje = in.readUTF();
-                    DataEvent ce = new DataEvent(respuesta);
-                    fireMyEvent(ce);
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(threadMessage.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(threadMessage.class.getName()).log(Level.SEVERE, null, ex);
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
-
-    /**
-     * ************************** eventos *****************************
-     */
-    protected EventListenerList listenerList = new EventListenerList();
+    //****************PARA LLAMAR A LOS EVENTOS
 
     public void addMyEventListener(SocketEventListenner listener) {
         listenerList.add(SocketEventListenner.class, listener);
@@ -72,7 +79,6 @@ public class threadMessage extends Thread {
     }
 
     void fireMyEvent(DataEvent evt) {
-        System.out.println("entra a fireMyEvent");
         Object[] listeners = listenerList.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if (listeners[i] == SocketEventListenner.class) {
@@ -80,7 +86,6 @@ public class threadMessage extends Thread {
             }
         }
     }
-
     /**
      * ************ fin eventos ********************
      */

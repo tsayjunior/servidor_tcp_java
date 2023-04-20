@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import events.ConnectEvent;
 
 import events.SocketEventListenner;
+import java.net.SocketException;
 import javax.swing.event.EventListenerList;
 /**
  *
@@ -21,7 +22,6 @@ import javax.swing.event.EventListenerList;
  */
 public class threadConnections extends Thread  {
     
-    Socket socket;
     ServerSocket servidor;
     
     public threadConnections(ServerSocket servidor) {
@@ -53,20 +53,29 @@ public class threadConnections extends Thread  {
     
     @Override
     public void run() {
-
-        try {
-            System.out.println("entra a run en cliente Conexiones ");
-            while (true) {
-                socket = servidor.accept();
-                
-                ConnectEvent ce = new ConnectEvent(socket);
-                fireMyEvent(ce);
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(threadConnections.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+        conexion();
     }
-    
+    public void conexion() {
+        // Aceptar conexiones de clientes
+        Socket socket;
+        while (true) {
+            try {
+                // Aceptar conexiones de clientes
+                System.out.println("entra a conexion threadConnections");
+                socket = servidor.accept();
+                System.out.println("entra a conexion threadConnections fireMyEvent");
+                ConnectEvent evento = new ConnectEvent(socket, this);
+                this.fireMyEvent(evento);
+                //System.out.println("Después del evento en HiloConexion");
+            } catch (SocketException e) {
+                // Manejo de la excepción SocketException
+                System.out.println("Se ha cerrado la conexión del cliente de manera abrupta (threadConnections).");
+                System.out.println(e);
+                // Puedes cerrar los recursos y finalizar el hilo de manera adecuada aquí
+            } catch (IOException e) {
+                System.err.println("Servidor: Error en la conexión con el cliente: " + e.getMessage());
+            }
+        }
+    }
     
 }
